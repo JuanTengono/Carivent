@@ -1,0 +1,319 @@
+{
+  "info": {
+    "name": "ProyectAgendas API (Módulos 1-4)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección para Auth, Security, Sites, Events, Agendas, Tickets, Notifications y Surveys"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Demo\",\n  \"email\": \"demo@mail.com\",\n  \"password\": \"12345678\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "Login (guarda token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@email.com\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json?.data?.token) {",
+                  "  pm.collectionVariables.set('token', json.data.token);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "disabled": true,
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{token}}_dummy\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/auth/logout"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Security",
+      "item": [
+        {
+          "name": "Get Roles",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/security/get-roles"
+          }
+        },
+        {
+          "name": "Get Permissions",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/security/get-permissions"
+          }
+        },
+        {
+          "name": "Assign Permission To Role",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": 3,\n  \"permissionIds\": [19,20,21,22,23,24,25,26,27,28]\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/security/assign-permission-to-role"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Sites",
+      "item": [
+        {
+          "name": "Create Site",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Centro Convenciones\",\n  \"ubication\": \"Bogotá\",\n  \"direction\": \"Calle 10 # 20-30\",\n  \"phone\": \"3001234567\",\n  \"email\": \"sitio{{$timestamp}}@mail.com\",\n  \"capacity\": 100\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/sites/create-site"
+          }
+        },
+        {
+          "name": "Get Sites",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/sites/get-sites"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Evento Demo\",\n  \"type\": \"PUBLIC\",\n  \"description\": \"Evento para pruebas\",\n  \"startTime\": \"2026-04-01T14:00:00.000Z\",\n  \"endTime\": \"2026-04-01T16:00:00.000Z\",\n  \"siteId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/events/create-event"
+          }
+        },
+        {
+          "name": "Get Events",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/events/get-events"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Agendas",
+      "item": [
+        {
+          "name": "Create Agenda",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"activity\": \"Registro\",\n  \"startTime\": \"2026-04-01T14:00:00.000Z\",\n  \"endTime\": \"2026-04-01T14:30:00.000Z\",\n  \"eventId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/agendas/create-agenda"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets (Módulo 3)",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"eventId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/tickets/create-ticket"
+          }
+        },
+        {
+          "name": "Get Tickets",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/tickets/get-tickets"
+          }
+        },
+        {
+          "name": "Validate Ticket",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/tickets/validate-ticket/TKT-REEMPLAZA-CODIGO-QR"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications (Módulo 4)",
+      "item": [
+        {
+          "name": "Create Notification",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Recordatorio\",\n  \"message\": \"Tu evento inicia en 1 hora\",\n  \"userId\": 3\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/notifications/create-notification"
+          }
+        },
+        {
+          "name": "Get Notifications",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/notifications/get-notifications"
+          }
+        },
+        {
+          "name": "Mark Notification As Read",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/notifications/mark-notification-as-read/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Surveys (Módulo 4)",
+      "item": [
+        {
+          "name": "Create Survey",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titleSurvey\": \"¿Cómo estuvo el evento?\",\n  \"eventId\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/surveys/create-survey"
+          }
+        },
+        {
+          "name": "Get Surveys",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/surveys/get-surveys"
+          }
+        },
+        {
+          "name": "Create Survey Response",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"surveyId\": 1,\n  \"stars\": 5,\n  \"comment\": \"Excelente evento\"\n}"
+            },
+            "url": "{{baseUrl}}/api/v1/surveys/create-survey-response"
+          }
+        },
+        {
+          "name": "Get Survey Responses",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/surveys/get-survey-responses"
+          }
+        }
+      ]
+    }
+  ]
+}

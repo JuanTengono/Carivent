@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-black text-white font-sans antialiased min-h-screen;
+  overflow-x: hidden;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.65)),
+    radial-gradient(ellipse at var(--cursor-x, 20%) var(--cursor-y, 0%), rgba(131, 12, 196, 0.7), transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(131, 12, 196, 0.4), transparent 55%);
+  background-attachment: fixed;
+}
+
+:root {
+  --brand-primary: #830cc4;
+  --brand-dark: #8f1fcf;
+  --brand-darker: #9a2edb;
+  --brand-medium: #b246f2;
+  --brand-light: #c263f9;
+  --brand-lighter: #d58cfc;
+  --brand-soft: #e5b3fe;
+  --brand-soft-light: #f3d9ff;
+  --brand-muted: rgba(131, 12, 196, 0.15);
+  --brand-muted-light: rgba(131, 12, 196, 0.08);
+  --brand-muted-medium: rgba(131, 12, 196, 0.12);
+  --brand-white: #ffffff;
+}
+
+#root {
+  @apply min-h-screen flex flex-col;
+}

@@ -1,0 +1,104 @@
+services:
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: mailpit
+    restart: always
+    ports:
+      - "${MAILPIT_SMTP_PORT}:1025"
+      - "${MAILPIT_WEB_PORT}:8025"
+
+  backend:
+    build: .
+    container_name: node_backend
+    restart: always
+    ports:
+      - "${PORT}:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      PORT: ${PORT}
+      JWT_SECRET: ${JWT_SECRET}
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      SMTP_FROM: ${SMTP_FROM}
+      EMAIL_PROVIDER: ${EMAIL_PROVIDER}
+      EMAIL_TRANSPORT: ${EMAIL_TRANSPORT}
+      EMAIL_LOG_PATH: ${EMAIL_LOG_PATH}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL}
+      GOOGLE_APPLICATION_CREDENTIALS: ${GOOGLE_APPLICATION_CREDENTIALS}
+      FIREBASE_SERVICE_ACCOUNT_JSON: ${FIREBASE_SERVICE_ACCOUNT_JSON}
+      RAILWAY_PUBLIC_DOMAIN: ${RAILWAY_PUBLIC_DOMAIN}
+      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_VERIFY_EMAIL_URL: ${FRONTEND_VERIFY_EMAIL_URL}
+      FRONTEND_RESET_PASSWORD_URL: ${FRONTEND_RESET_PASSWORD_URL}
+      APP_DEEP_LINK_SCHEME: ${APP_DEEP_LINK_SCHEME}
+      APP_DEEP_LINK_HOST: ${APP_DEEP_LINK_HOST}
+      APP_LINK_BRIDGE_BASE_URL: ${APP_LINK_BRIDGE_BASE_URL}
+      EMAIL_VERIFICATION_TOKEN_TTL_MINUTES: ${EMAIL_VERIFICATION_TOKEN_TTL_MINUTES}
+      PASSWORD_RESET_TOKEN_TTL_MINUTES: ${PASSWORD_RESET_TOKEN_TTL_MINUTES}
+    depends_on:
+      db:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    command: sh -c "npm run start:docker && npm run start"
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    restart: always
+    ports:
+      - "${ADMINER_PORT}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # migrate:
+  #   build: .
+  #   command: npx prisma migrate dev --name init
+  #   environment:
+  #     DATABASE_URL: ${DATABASE_URL}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+  # seed:
+  #   build: .
+  #   command: npx prisma db seed
+  #   environment:
+  #     DATABASE_URL: ${DATABASE_URL}
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+
+volumes:
+  postgres_data:

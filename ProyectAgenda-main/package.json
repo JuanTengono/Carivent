@@ -1,0 +1,42 @@
+{
+  "name": "eventos",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "start:docker": "npx prisma generate && npx prisma migrate deploy && npx prisma db seed",
+    "seed:user:permissions": "node scripts/ensure-user-base-permissions.js",
+    "seed:test-users": "node scripts/ensure-test-login-users.js",
+    "seed:endpoints:34": "node scripts/seed-modules-3-4-endpoints.js",
+    "test:intensive:34": "node scripts/test-modules-3-4-intensive.js",
+    "test:public": "node scripts/test-public-endpoints.js",
+    "test:user:regression": "node scripts/test-user-regression.js",
+    "test:full:features": "node scripts/test-full-features.js",
+    "test:auth:email": "node scripts/test-auth-email-flows.js",
+    "test:auth:integration": "node scripts/test-auth-integration.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "prisma": {
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.16.0",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^4.21.0",
+    "firebase-admin": "^13.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.10.1",
+    "stripe": "^17.7.0",
+    "swagger-ui-express": "^5.0.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.16.0"
+  }
+}
