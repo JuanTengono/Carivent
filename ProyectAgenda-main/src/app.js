@@ -18,10 +18,54 @@ const errorMiddleware = require("./middleware/error.middleware");
 const { stripeWebhook } = require("./controllers/payments.controller");
 const app = express();
 
-app.use(cors({
-  origin: process.env.FRONTEND_URL ? process.env.FRONTEND_URL.split(",") : true,
-  credentials: true,
-}));
+function parseCsv(value) {
+  return (value || "")
+    .split(",")
+    .map((v) => v.trim())
+    .filter(Boolean);
+}
+
+function buildAllowedOrigins() {
+  const configured = parseCsv(process.env.FRONTEND_URL);
+  const defaults = ["http://localhost:5173"];
+  return new Set([...defaults, ...configured]);
+}
+
+function buildOriginRegexes() {
+  return parseCsv(process.env.FRONTEND_ORIGIN_REGEX)
+    .map((pattern) => {
+      try {
+        return new RegExp(pattern);
+      } catch (error) {
+        console.warn(`FRONTEND_ORIGIN_REGEX inválido ignorado: ${pattern}`);
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+const allowedOrigins = buildAllowedOrigins();
+const allowedOriginRegexes = buildOriginRegexes();
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.has(origin)) {
+        return callback(null, true);
+      }
+
+      const matchesRegex = allowedOriginRegexes.some((regex) => regex.test(origin));
+      if (matchesRegex) {
+        return callback(null, true);
+      }
+
+      return callback(new Error(`Origin no permitido por CORS: ${origin}`));
+    },
+    credentials: true,
+  })
+);
 
 app.post(
   "/api/v1/payments/webhook",
