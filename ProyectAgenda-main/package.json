@@ -20,10 +20,7 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "prisma": {
-    "schema": "prisma/schema.prisma",
-    "seed": "node prisma/seed.js"
-  },
+  
   "dependencies": {
     "@prisma/client": "^6.16.0",
     "bcryptjs": "^3.0.3",
