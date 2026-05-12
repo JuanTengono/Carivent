@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const swaggerUi = require("swagger-ui-express");
 const authRoutes = require("./routes/auth.routes");
 const publicRoutes = require("./routes/public.routes");
@@ -47,23 +46,31 @@ function buildOriginRegexes() {
 const allowedOrigins = buildAllowedOrigins();
 const allowedOriginRegexes = buildOriginRegexes();
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Requests sin Origin (curl, Postman, server-to-server) siempre pasan
-      if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.has(origin) ||
-        allowedOriginRegexes.some((r) => r.test(origin))
-      ) {
-        return callback(null, true);
-      }
-      console.warn(`CORS bloqueado para origin: ${origin}`);
-      return callback(null, false);
-    },
-    credentials: true,
-  })
-);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const allowed =
+    !origin ||
+    allowedOrigins.has(origin) ||
+    allowedOriginRegexes.some((r) => r.test(origin));
+
+  if (allowed && origin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type,Authorization,Accept");
+    res.setHeader("Vary", "Origin");
+  }
+
+  if (!allowed) {
+    console.warn(`[CORS] Bloqueado: ${origin}`);
+  }
+
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  next();
+});
 
 app.post(
   "/api/v1/payments/webhook",
