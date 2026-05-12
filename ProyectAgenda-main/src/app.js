@@ -49,20 +49,7 @@ const allowedOriginRegexes = buildOriginRegexes();
 
 app.use(
   cors({
-    origin(origin, callback) {
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.has(origin)) {
-        return callback(null, true);
-      }
-
-      const matchesRegex = allowedOriginRegexes.some((regex) => regex.test(origin));
-      if (matchesRegex) {
-        return callback(null, true);
-      }
-
-      return callback(new Error(`Origin no permitido por CORS: ${origin}`));
-    },
+    origin: true,
     credentials: true,
   })
 );
