@@ -49,7 +49,18 @@ const allowedOriginRegexes = buildOriginRegexes();
 
 app.use(
   cors({
-    origin: true,
+    origin: (origin, callback) => {
+      // Requests sin Origin (curl, Postman, server-to-server) siempre pasan
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.has(origin) ||
+        allowedOriginRegexes.some((r) => r.test(origin))
+      ) {
+        return callback(null, true);
+      }
+      console.warn(`CORS bloqueado para origin: ${origin}`);
+      return callback(null, false);
+    },
     credentials: true,
   })
 );
