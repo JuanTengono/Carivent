@@ -16,6 +16,10 @@
     "test:auth:email": "node scripts/test-auth-email-flows.js",
     "test:auth:integration": "node scripts/test-auth-integration.js"
   },
+  "prisma":{
+    "schema": "prisma/schema.prisma",
+    "seed": "node prisma/seed.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
