@@ -22,6 +22,7 @@ export function HomePage() {
   const rootRef = useRef<HTMLDivElement>(null);
   const { push } = useToast();
   const [items, setItems] = useState<PublicEvent[]>([]);
+  const [item, setItem] = useState<PublicEvent | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -46,6 +47,8 @@ export function HomePage() {
         });
         setItems(data.items);
         setTotalPages(data.pagination.totalPages || 1);
+        const randomIndex = Math.floor(Math.random() * data.items.length);
+        setItem(data.items[randomIndex]);
       } catch (e) {
         const msg = e instanceof ApiRequestError ? e.message : "No se pudieron cargar los eventos";
         push(msg, "error");
@@ -295,23 +298,23 @@ export function HomePage() {
             <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-black/60 shadow-card">
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/10 to-transparent" />
               <img
-                src={HERO_IMAGES.main}
-                alt="Feria de Innovación Tecnológica 2026"
+                src={item?.imageUrl || HERO_IMAGES.main}
+                alt={item?.name || "Feria de Innovación Tecnológica 2026"}
                 className="h-[420px] w-full object-cover md:h-[520px]"
                 data-parallax
               />
-              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8">
+              <div className="absolute inset-x-0 bottom-0 p-6 md:p-8" style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}>
                 <p className="text-xs uppercase tracking-[0.3em] text-brand/80">Evento destacado</p>
                 <h2 className="mt-2 max-w-sm text-2xl font-semibold text-white md:text-3xl">
-                  Feria de Innovación Tecnológica 2026
+                  { item?.name || "Feria de Innovación Tecnológica 2026"}
                 </h2>
                 <p className="mt-2 max-w-sm text-sm leading-6 text-zinc-300">
-                  Un escaparate visual para lanzamientos, networking y charlas con enfoque en futuro.
+                  { item?.description || "Un escaparate visual para lanzamientos, networking y charlas con enfoque en futuro."}
                 </p>
               </div>
             </div>
 
-            <div
+            {/*<div
               data-hero-floating
               className="absolute -left-4 top-6 hidden max-w-[220px] overflow-hidden rounded-2xl border border-white/10 bg-surface-elevated shadow-card md:block"
             >
@@ -348,7 +351,7 @@ export function HomePage() {
                   Live
                 </div>
               </div>
-            </div>
+            </div>*/}
           </div>
         </div>
       </section>
