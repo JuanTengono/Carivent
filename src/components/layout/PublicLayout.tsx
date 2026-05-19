@@ -1,5 +1,6 @@
 import { Outlet } from "react-router-dom";
 import { PublicHeader } from "./PublicHeader";
+import { ChatWidget } from "../chat/ChatWidget";
 
 export function PublicLayout() {
   return (
@@ -11,6 +12,7 @@ export function PublicLayout() {
       <footer className="border-t border-white/10 py-6 text-center text-xs text-zinc-500">
         Carivent · Descubre eventos increíbles
       </footer>
+      <ChatWidget />
     </div>
   );
 }
