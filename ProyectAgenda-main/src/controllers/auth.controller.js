@@ -6,6 +6,7 @@ const { successResponse } = require("../config/interfaces/success.interface");
 const { validateFields } = require("../config/utils/rulesValidations");
 const { issueUserAuthToken, consumeUserAuthToken } = require("../services/auth-token.service");
 const {
+    sendWelcomeEmail,
     sendEmailVerificationEmail,
     sendPasswordResetEmail,
 } = require("../services/email.service");
@@ -143,6 +144,20 @@ exports.register = async (req, res, next) => {
         });
 
         await issueAndSendEmailVerification(newUser);
+
+        sendWelcomeEmail({
+            to: newUser.email,
+            userId: newUser.id,
+            userName: newUser.name,
+            email: newUser.email,
+        }).catch((error) => {
+            console.error(JSON.stringify({
+                event: "WELCOME_EMAIL_NON_BLOCKING_ERROR",
+                timestamp: new Date().toISOString(),
+                userId: newUser.id,
+                error: error.message,
+            }));
+        });
 
         return res.json(successResponse("Usuario registrado", newUser, 201));
     } catch (error) {

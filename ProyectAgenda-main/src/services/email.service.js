@@ -212,44 +212,161 @@ function resolveEmailDelivery() {
     };
 }
 
+function emailBase(bodyContent) {
+    return `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background-color:#0d0d0d;font-family:Arial,Helvetica,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0d0d0d;padding:40px 16px">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background-color:#111111;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)">
+      <tr>
+        <td style="background:linear-gradient(135deg,#1a0030 0%,#2a0050 100%);padding:36px;text-align:center">
+          <table cellpadding="0" cellspacing="0" style="margin:0 auto">
+            <tr><td style="width:56px;height:56px;background-color:#830cc4;border-radius:50%;text-align:center;vertical-align:middle;font-size:26px;font-weight:bold;color:#ffffff;line-height:56px">C</td></tr>
+          </table>
+          <p style="margin:14px 0 0;color:#ffffff;font-size:22px;font-weight:bold;letter-spacing:0.5px">Carivent</p>
+        </td>
+      </tr>
+      <tr><td style="padding:36px 40px">${bodyContent}</td></tr>
+      <tr>
+        <td style="background-color:#0a0a0a;padding:20px 40px;text-align:center;border-top:1px solid rgba(255,255,255,0.06)">
+          <p style="margin:0;color:#555555;font-size:12px">Carivent &middot; Descubre eventos incre&iacute;bles</p>
+          <p style="margin:6px 0 0;color:#444444;font-size:11px">Si no reconoces esta acci&oacute;n, ignora este mensaje.</p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`;
+}
+
+function buildWelcomeTemplate(payload) {
+    const subject = `¡Bienvenido a Carivent, ${payload.userName || ""}!`.trim();
+
+    const text = [
+        `Hola ${payload.userName || ""},`,
+        "",
+        "¡Tu cuenta en Carivent fue creada con éxito!",
+        "Ya puedes explorar eventos, comprar boletas y vivir experiencias increíbles.",
+        "",
+        "Si no creaste esta cuenta, ignora este mensaje.",
+        "",
+        "— El equipo de Carivent",
+    ].join("\n");
+
+    const frontendUrl = getEnv("FRONTEND_URL", "https://carivent.vercel.app");
+
+    const html = emailBase(`
+      <h2 style="margin:0 0 8px;color:#ffffff;font-size:22px">¡Bienvenido, ${payload.userName || ""}! &#x1F389;</h2>
+      <p style="margin:0 0 20px;color:#a0a0a0;font-size:14px;line-height:1.6">
+        Tu cuenta fue creada exitosamente. Ahora formas parte de Carivent, donde encontrar&aacute;s deportes, tecnolog&iacute;a, cultura y mucho m&aacute;s en una sola cartelera.
+      </p>
+
+      <table cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;border-radius:10px;border:1px solid rgba(255,255,255,0.08);width:100%;margin-bottom:28px">
+        <tr>
+          <td style="padding:20px 24px">
+            <p style="margin:0 0 6px;color:#777777;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Tu cuenta</p>
+            <p style="margin:0;color:#ffffff;font-size:15px;font-weight:bold">${payload.userName || ""}</p>
+            <p style="margin:4px 0 0;color:#999999;font-size:13px">${payload.email || ""}</p>
+          </td>
+        </tr>
+      </table>
+
+      <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px">
+        <tr>
+          <td align="center">
+            <a href="${frontendUrl}" style="display:inline-block;background-color:#830cc4;color:#ffffff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:bold">
+              Explorar eventos
+            </a>
+          </td>
+        </tr>
+      </table>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px">
+        <p style="margin:0;color:#666666;font-size:13px;line-height:1.6">
+          &iquest;Tienes dudas? Escr&iacute;benos directamente respondiendo este correo.
+        </p>
+      </div>
+    `);
+
+    return { subject, text, html };
+}
+
 function buildTicketConfirmationTemplate(payload) {
     const startDate = toIsoDate(payload.startTime);
     const endDate = toIsoDate(payload.endTime);
-    const location = [payload.siteName, payload.siteAddress, payload.siteCity].filter(Boolean).join(" - ");
+    const location = [payload.siteName, payload.siteAddress, payload.siteCity].filter(Boolean).join(" · ");
 
-    const subject = "Confirmacion de compra de boleta";
+    const subject = `¡Tu boleta está confirmada! – ${payload.eventName || "Carivent"}`;
 
     const text = [
-        `Hola ${payload.userName || "usuario"},`,
+        `Hola ${payload.userName || ""},`,
         "",
-        "Tu compra de boleta fue confirmada.",
+        "¡Tu compra fue exitosa! Aquí están los detalles de tu boleta:",
         "",
-        `Evento: ${payload.eventName || "No disponible"}`,
-        `Inicio: ${startDate}`,
-        `Fin: ${endDate}`,
-        `Lugar: ${location || "No disponible"}`,
-        `ID Ticket: ${payload.ticketId}`,
-        `Code QR: ${payload.codeQr}`,
+        `Evento : ${payload.eventName || "No disponible"}`,
+        `Inicio : ${startDate}`,
+        `Fin    : ${endDate}`,
+        `Lugar  : ${location || "No disponible"}`,
+        `Ticket : #${payload.ticketId}`,
+        `Código : ${payload.codeQr}`,
         "",
-        "Gracias por usar la plataforma.",
+        "Presenta el código QR en la entrada del evento.",
+        "Gracias por elegir Carivent.",
     ].join("\n");
 
-    const html = `
-        <div style="font-family: Arial, sans-serif; line-height: 1.4;">
-            <h2>Confirmacion de compra de boleta</h2>
-            <p>Hola ${payload.userName || "usuario"},</p>
-            <p>Tu compra de boleta fue confirmada.</p>
-            <ul>
-                <li><strong>Evento:</strong> ${payload.eventName || "No disponible"}</li>
-                <li><strong>Inicio:</strong> ${startDate}</li>
-                <li><strong>Fin:</strong> ${endDate}</li>
-                <li><strong>Lugar:</strong> ${location || "No disponible"}</li>
-                <li><strong>ID Ticket:</strong> ${payload.ticketId}</li>
-                <li><strong>Code QR:</strong> ${payload.codeQr}</li>
-            </ul>
-            <p>Gracias por usar la plataforma.</p>
-        </div>
-    `;
+    const html = emailBase(`
+      <h2 style="margin:0 0 8px;color:#ffffff;font-size:22px">&#x1F3AB; ¡Boleta confirmada!</h2>
+      <p style="margin:0 0 24px;color:#a0a0a0;font-size:14px;line-height:1.6">
+        Hola <strong style="color:#ffffff">${payload.userName || ""}</strong>, tu compra fue procesada con &eacute;xito. Aqu&iacute; tienes todo lo que necesitas para el evento.
+      </p>
+
+      <table cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;border-radius:12px;border:1px solid rgba(131,12,196,0.3);width:100%;margin-bottom:24px">
+        <tr>
+          <td style="padding:20px 24px;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <p style="margin:0 0 4px;color:#777777;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Evento</p>
+            <p style="margin:0;color:#ffffff;font-size:16px;font-weight:bold">${payload.eventName || "No disponible"}</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 24px;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <table width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="width:50%;vertical-align:top">
+                  <p style="margin:0 0 4px;color:#777777;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Inicio</p>
+                  <p style="margin:0;color:#cccccc;font-size:13px">${startDate}</p>
+                </td>
+                <td style="width:50%;vertical-align:top">
+                  <p style="margin:0 0 4px;color:#777777;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Fin</p>
+                  <p style="margin:0;color:#cccccc;font-size:13px">${endDate}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:16px 24px">
+            <p style="margin:0 0 4px;color:#777777;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">Lugar</p>
+            <p style="margin:0;color:#cccccc;font-size:13px">${location || "No disponible"}</p>
+          </td>
+        </tr>
+      </table>
+
+      <table cellpadding="0" cellspacing="0" style="background-color:#1a0030;border-radius:12px;border:1px solid rgba(131,12,196,0.4);width:100%;margin-bottom:28px">
+        <tr>
+          <td style="padding:20px 24px">
+            <p style="margin:0 0 4px;color:#b246f2;font-size:11px;text-transform:uppercase;letter-spacing:0.1em">C&oacute;digo de tu boleta #${payload.ticketId}</p>
+            <p style="margin:8px 0 0;color:#ffffff;font-size:13px;font-family:monospace;word-break:break-all;background-color:rgba(0,0,0,0.3);padding:12px;border-radius:8px;border:1px solid rgba(131,12,196,0.2)">${payload.codeQr}</p>
+            <p style="margin:10px 0 0;color:#888888;font-size:12px">Presenta este c&oacute;digo QR en la entrada del evento.</p>
+          </td>
+        </tr>
+      </table>
+
+      <div style="border-top:1px solid rgba(255,255,255,0.08);padding-top:20px;text-align:center">
+        <p style="margin:0;color:#666666;font-size:13px">Gracias por elegir Carivent. &#x1F389;</p>
+      </div>
+    `);
 
     return { subject, text, html };
 }
@@ -553,6 +670,18 @@ async function sendEmail({ type, to, subject, text, html, metadata = {} }) {
     }
 }
 
+async function sendWelcomeEmail(payload) {
+    const template = buildWelcomeTemplate(payload);
+    return sendEmail({
+        type: "WELCOME",
+        to: payload.to,
+        subject: template.subject,
+        text: template.text,
+        html: template.html,
+        metadata: { userId: payload.userId },
+    });
+}
+
 async function sendTicketPurchaseConfirmationEmail(payload) {
     const template = buildTicketConfirmationTemplate(payload);
     return sendEmail({
@@ -634,6 +763,7 @@ async function sendPaymentInvoiceEmail(payload) {
 }
 
 module.exports = {
+    sendWelcomeEmail,
     sendTicketPurchaseConfirmationEmail,
     sendEmailVerificationEmail,
     sendPasswordResetEmail,
