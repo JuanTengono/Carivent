@@ -14,12 +14,10 @@ export async function sendChatMessage(message: string): Promise<string> {
 
   const json = (await res.json()) as Record<string, unknown>;
 
-  if (json?.success === true) {
-    const data = json.data as Record<string, unknown> | undefined;
-    if (typeof data?.reply === "string") return data.reply;
-    if (typeof data?.message === "string") return data.message;
-    if (typeof data === "string") return data;
-  }
+  // Soporta { status: "success", data: { reply } } y { success: true, data: { reply } }
+  const data = json.data as Record<string, unknown> | undefined;
+  if (typeof data?.reply === "string") return data.reply;
+  if (typeof data?.message === "string") return data.message;
   if (typeof json?.reply === "string") return json.reply;
   if (typeof json?.message === "string") return json.message;
 
